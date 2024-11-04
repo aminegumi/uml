@@ -47,3 +47,77 @@
   border: solid 1px black;
   background-color: aqua;
 }
+
+/*///////////////////////////PROGRESBAR///////////////////////////*/
+/* Background overlay to center the progress bar */
+.progress-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  /* semi-transparent dark background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Container for progress bar */
+.progress-container {
+  width: 80%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Brand text style */
+.brand-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #007bff;
+  /* Primary color */
+  margin-bottom: 10px;
+}
+
+/* Loading text style */
+.loading-text {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 15px;
+}
+/*///////////////////////////Fin PROGRESBAR///////////////////////////*/
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.progress-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+}
+
+.left-sidebar,
+.right-sidebar {
+  background-color: #f8f9fa;
+  padding: 16px;
+}
+
+.body {
+  flex-grow: 1;
+  background-color: #ffffff;
+  padding: 16px;
+  overflow: auto;
+}
