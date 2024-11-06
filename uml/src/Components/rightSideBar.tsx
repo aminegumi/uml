@@ -1,49 +1,68 @@
-import React from "react";
+import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/Components/ui/sidebar";
+
+// Menu items.
+const items = [
+  {
+    title: "Home",
+    url: "#",
+    icon: Home,
+  },
+  {
+    title: "Inbox",
+    url: "#",
+    icon: Inbox,
+  },
+  {
+    title: "Calendar",
+    url: "#",
+    icon: Calendar,
+  },
+  {
+    title: "Search",
+    url: "#",
+    icon: Search,
+  },
+  {
+    title: "Settings",
+    url: "#",
+    icon: Settings,
+  },
+];
 
 const RightSideBar = () => {
   return (
-    <div
-      className="right-sidebar"
-      style={{
-        width: "200px",
-        backgroundColor: "#f8f9fa",
-        padding: "16px",
-        borderLeft: "1px solid #ccc",
-      }}
-    >
-      <h4>Palette</h4>
-      {/* Add your palette content here */}
-      <div>
-        <button
-          style={{
-            display: "block",
-            margin: "5px 0",
-            padding: "10px",
-            width: "100%",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
-          Add Class
-        </button>
-        <button
-          style={{
-            display: "block",
-            margin: "5px 0",
-            padding: "10px",
-            width: "100%",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
-          Add Relationship
-        </button>
-      </div>
-    </div>
+    <Sidebar side="right" variant="floating" className="my-14">
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   );
 };
 

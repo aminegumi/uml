@@ -1,33 +1,61 @@
-import React from "react";
+import { useEffect, useRef } from "react";
+import * as joint from "jointjs";
 
 const Body = () => {
+  const graphRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = graphRef.current;
+    if (!container) return;
+
+    const graph = new joint.dia.Graph();
+
+    const paper = new joint.dia.Paper({
+      el: container,
+      model: graph,
+      width: container.clientWidth,
+      height: container.clientHeight,
+      gridSize: 10,
+      drawGrid: true,
+    });
+
+    const rect = new joint.shapes.standard.Rectangle();
+    rect.position(100, 30);
+    rect.resize(100, 40);
+    rect.attr({
+      body: {
+        fill: "blue",
+      },
+      label: {
+        text: "Classe Exemple",
+        fill: "white",
+      },
+    });
+    rect.addTo(graph);
+
+    // Mettre à jour les dimensions du paper lorsque la fenêtre est redimensionnée
+    const handleResize = () => {
+      paper.setDimensions(container.clientWidth, container.clientHeight);
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      paper.clearGrid();
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <div
-      className="body"
+      ref={graphRef}
       style={{
-        flexGrow: 1,
-        backgroundColor: "#ffffff",
-        padding: "16px",
-        overflow: "auto",
+        width: "100%",
+        height: "100vh", // S'adapte à la hauteur de la colonne
+        border: "1px solid black",
+        padding: "2px",
+        position: "relative",
       }}
-    >
-      <h4>Canvas Area</h4>
-      {/* Add your diagram area here */}
-      <div
-        style={{
-          width: "100%",
-          height: "calc(100% - 40px)", // Adjust height if needed
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-          backgroundColor: "#f9f9f9",
-          position: "relative",
-        }}
-      >
-        <p style={{ textAlign: "center", paddingTop: "20px", color: "#999" }}>
-          Your diagrams will appear here
-        </p>
-      </div>
-    </div>
+    ></div>
   );
 };
 
