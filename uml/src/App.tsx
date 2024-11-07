@@ -7,7 +7,7 @@ import Body from "./Components/body";
 import LeftSideBar from "./Components/leftSideBar";
 import RightSideBar from "./Components/rightSideBar";
 import { SidebarProvider } from "./Components/ui/sidebar";
-import { Col, Container, Row } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -15,7 +15,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -25,21 +25,19 @@ function App() {
       {loading ? (
         <AnimatedExample />
       ) : (
-        <Container fluid>
+        <Container fluid className="p-0">
           <Heading />
-          <Row className="h-100" style={{ overflow: "hidden" }}>
+          <Row className="layout-container g-0">
             <SidebarProvider>
-              <Col className="col-2">
+              <div className="sidebar-wrapper">
                 <LeftSideBar />
-              </Col>
-              <Col xs={6} className="d-flex flex-column">
-                <main className="flex-grow-1">
-                  <Body />
-                </main>
-              </Col>
-              <Col className="col-2">
+              </div>
+              <main className="main-content">
+                <Body />
+              </main>
+              <div className="sidebar-wrapper">
                 <RightSideBar />
-              </Col>
+              </div>
             </SidebarProvider>
           </Row>
         </Container>

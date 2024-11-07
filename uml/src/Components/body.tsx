@@ -1,61 +1,157 @@
-import { useEffect, useRef } from "react";
-import * as joint from "jointjs";
+import React, { useEffect, useRef } from "react";
+import * as go from "gojs";
 
-const Body = () => {
-  const graphRef = useRef<HTMLDivElement>(null);
+const Body: React.FC = () => {
+  const diagramRef = useRef<go.Diagram | null>(null);
 
   useEffect(() => {
-    const container = graphRef.current;
-    if (!container) return;
-
-    const graph = new joint.dia.Graph();
-
-    const paper = new joint.dia.Paper({
-      el: container,
-      model: graph,
-      width: container.clientWidth,
-      height: container.clientHeight,
-      gridSize: 10,
-      drawGrid: true,
+    // Initialize GoJS diagram
+    const $ = go.GraphObject.make;
+    
+    const diagram = new go.Diagram("myDiagramDiv", {
+      "undoManager.isEnabled": true,
+      layout: new go.TreeLayout({
+        angle: 90,
+        path: go.TreePath.Source,
+        setsPortSpot: false,
+        setsChildPortSpot: false,
+        arrangement: go.TreeArrangement.Horizontal,
+      }),
     });
 
-    const rect = new joint.shapes.standard.Rectangle();
-    rect.position(100, 30);
-    rect.resize(100, 40);
-    rect.attr({
-      body: {
-        fill: "blue",
+    // Class node template
+    diagram.nodeTemplate = $(go.Node, "Auto",
+      {
+        locationSpot: go.Spot.Center,
+        fromSpot: go.Spot.AllSides,
+        toSpot: go.Spot.AllSides
       },
-      label: {
-        text: "Classe Exemple",
-        fill: "white",
-      },
-    });
-    rect.addTo(graph);
+      $(go.Shape, "Rectangle",
+        { fill: "white" },
+        new go.Binding("fill", "isHighlighted", h => h ? "lightblue" : "white").ofObject()),
+      $(go.Panel, "Table",
+        { defaultAlignment: go.Spot.Left, margin: 4 },
+        // Class name
+        $(go.RowColumnDefinition, { row: 0, background: "#F0F0F0" }),
+        $(go.TextBlock,
+          { row: 0, margin: 3, font: "bold 12px sans-serif" },
+          new go.Binding("text", "name")),
+        // Properties
+        $(go.Panel, "Vertical",
+          { row: 1, margin: 3 },
+          new go.Binding("itemArray", "properties"),
+          {
+            itemTemplate: $(go.Panel, "Auto",
+              $(go.TextBlock,
+                { margin: new go.Margin(0, 0, 0, 0) },
+                new go.Binding("text", "name"))
+            )
+          }
+        ),
+        // Methods
+        $(go.Panel, "Vertical",
+          { row: 2, margin: 3 },
+          new go.Binding("itemArray", "methods"),
+          {
+            itemTemplate: $(go.Panel, "Auto",
+              $(go.TextBlock,
+                { margin: new go.Margin(0, 0, 0, 0) },
+                new go.Binding("text", "name"))
+            )
+          }
+        )
+      )
+    );
 
-    // Mettre à jour les dimensions du paper lorsque la fenêtre est redimensionnée
-    const handleResize = () => {
-      paper.setDimensions(container.clientWidth, container.clientHeight);
-    };
-    window.addEventListener("resize", handleResize);
+    // Link template
+    diagram.linkTemplate = $(go.Link,
+      { routing: go.Link.AvoidsNodes },
+      $(go.Shape),
+      $(go.Shape, { toArrow: "Standard" })
+    );
+
+    diagramRef.current = diagram;
 
     return () => {
-      paper.clearGrid();
-      window.removeEventListener("resize", handleResize);
+      diagram.div = null;
     };
   }, []);
 
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    const elementType = event.dataTransfer.getData("elementType");
+    const diagram = diagramRef.current;
+    
+    if (diagram) {
+      const canvasPoint = diagram.transformViewToDoc(
+        new go.Point(event.clientX, event.clientY)
+      );
+
+      let nodeData: go.ObjectData | null = null;
+      
+      switch (elementType) {
+        case "class":
+          nodeData = {
+            key: Date.now(),
+            name: "NewClass",
+            properties: [{ name: "property1: Type" }],
+            methods: [{ name: "method1(): ReturnType" }],
+            category: "class",
+            loc: `${canvasPoint.x} ${canvasPoint.y}`
+          };
+          break;
+        case "interface":
+          nodeData = {
+            key: Date.now(),
+            name: "NewInterface",
+            properties: [],
+            methods: [{ name: "method1(): ReturnType" }],
+            category: "interface",
+            loc: `${canvasPoint.x} ${canvasPoint.y}`
+          };
+          break;
+        case "abstract":
+          nodeData = {
+            key: Date.now(),
+            name: "AbstractClass",
+            properties: [],
+            methods: [{ name: "abstractMethod(): void" }],
+            category: "abstract",
+            loc: `${canvasPoint.x} ${canvasPoint.y}`
+          };
+          break;
+        case "enum":
+          nodeData = {
+            ket: Date.now(),
+            name: "Enumeration",
+            properties: [{ name: "enum1: Type" }, {name: "enum2: Type" }],
+            category: "enum",
+            loc: `${canvasPoint.x} ${canvasPoint.y}`
+          };
+      }
+
+      if (nodeData) {
+        // Add the node data to the model
+        diagram.model.addNodeData(nodeData);
+        // Commit the transaction
+        diagram.commitTransaction("added node");
+      }
+    }
+  };
+
   return (
-    <div
-      ref={graphRef}
-      style={{
-        width: "100%",
-        height: "100vh", // S'adapte à la hauteur de la colonne
-        border: "1px solid black",
-        padding: "2px",
-        position: "relative",
-      }}
-    ></div>
+    <div className="body">
+      <div
+        id="myDiagramDiv"
+        className="diagram-component"
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      />
+    </div>
   );
 };
 

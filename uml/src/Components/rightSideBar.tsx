@@ -1,4 +1,14 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import {
+  Box,
+  Boxes,
+  GitFork,
+  Diamond,
+  ArrowRight,
+  ArrowLeftRight,
+  Component,
+  Circle,
+  Square,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -6,61 +16,84 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/Components/ui/sidebar";
+} from "@/components/ui/sidebar";
 
 // Menu items.
-const items = [
+const paletteItems = [
   {
-    title: "Home",
-    url: "#",
-    icon: Home,
+    category: "Class Elements",
+    items: [
+      { type: "class", icon: Box, label: "Class" },
+      { type: "interface", icon: Boxes, label: "Interface" },
+      { type: "abstract", icon: Component, label: "Abstract Class" },
+      { type: "enum", icon: Square, label: "Enumeration" },
+    ],
   },
   {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
+    category: "Relationships",
+    items: [
+      { type: "inheritance", icon: GitFork, label: "Inheritance" },
+      { type: "implementation", icon: ArrowRight, label: "Implementation" },
+      { type: "association", icon: ArrowLeftRight, label: "Association" },
+      { type: "aggregation", icon: Diamond, label: "Aggregation" },
+      { type: "composition", icon: Circle, label: "Composition" },
+    ],
   },
 ];
 
 const RightSideBar = () => {
+  const handleDragStart = (event: React.DragEvent, elementType: string) => {
+    event.dataTransfer.setData("elementType", elementType);
+  };
+
+  // Menu items.
+  const paletteItems = [
+    {
+      category: "Class Elements",
+      items: [
+        { type: "class", icon: Box, label: "Class" },
+        { type: "interface", icon: Boxes, label: "Interface" },
+        { type: "abstract", icon: Component, label: "Abstract Class" },
+        { type: "enum", icon: Square, label: "Enumeration" },
+      ],
+    },
+    {
+      category: "Relationships",
+      items: [
+        { type: "inheritance", icon: GitFork, label: "Inheritance" },
+        { type: "implementation", icon: ArrowRight, label: "Implementation" },
+        { type: "association", icon: ArrowLeftRight, label: "Association" },
+        { type: "aggregation", icon: Diamond, label: "Aggregation" },
+        { type: "composition", icon: Circle, label: "Composition" },
+      ],
+    },
+  ];
+
   return (
     <Sidebar side="right" variant="floating" className="my-14">
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {paletteItems.map((category) => (
+          <SidebarGroup key={category.category}>
+            <SidebarGroupLabel>{category.category}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="grid grid-cols-1 gap-2">
+                {category.items.map((item) => (
+                  <div
+                    key={item.type}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, item.type)}
+                    className="flex items-center gap-2 rounded-lg cursor-move hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="p-2 bg-white rounded shadow-sm">
+                      <item.icon className="w-6 h-6" />
+                    </div>
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
     </Sidebar>
   );
