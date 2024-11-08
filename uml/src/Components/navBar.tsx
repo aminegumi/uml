@@ -1,4 +1,4 @@
-import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
+import { Container, Nav, Navbar, NavDropdown, Row } from "react-bootstrap";
 import {
   Moon,
   Sun,
@@ -14,7 +14,7 @@ import {
 
 function Heading() {
   return (
-    <>
+    <Row>
       <Navbar bg="white" className="shadow-sm fixed top-0 left-0 right-0 z-100" fixed="top">
         <Container fluid className="px-4">
           <Navbar.Brand href="#" className="text-primary font-semibold">
@@ -155,7 +155,7 @@ function Heading() {
       </Navbar>
 
       <div className="h-16"></div>
-    </>
+    </Row>
   );
 }
 
