@@ -8,6 +8,7 @@ import LeftSideBar from "./Components/leftSideBar";
 import RightSideBar from "./Components/rightSideBar";
 import { SidebarProvider } from "./Components/ui/sidebar";
 import { Container, Row } from "react-bootstrap";
+import UMLClassInput from "./Components/classEditor";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -21,28 +22,30 @@ function App() {
   }, []);
 
   return (
-    <>
-      {loading ? (
-        <AnimatedExample />
-      ) : (
-        <Container fluid className="p-0">
-          <Heading />
-          <Row className="layout-container g-0">
-            <SidebarProvider>
-              <div className="sidebar-wrapper">
-                <LeftSideBar />
-              </div>
-              <main className="main-content">
-                <Body />
-              </main>
-              <div className="sidebar-wrapper">
-                <RightSideBar />
-              </div>
-            </SidebarProvider>
-          </Row>
-        </Container>
-      )}
-    </>
+    // <>
+    //   {loading ? (
+    //     <AnimatedExample />
+    //   ) : (
+    //     <Container fluid className="p-0">
+    //       <Heading />
+    //       <Row className="layout-container g-0">
+    //         <SidebarProvider>
+    //           <div className="sidebar-wrapper">
+    //             <LeftSideBar />
+    //           </div>
+    //           <main className="main-content">
+    //             <Body />
+    //           </main>
+    //           <div className="sidebar-wrapper">
+    //             <RightSideBar />
+    //           </div>
+    //         </SidebarProvider>
+    //       </Row>
+    //     </Container>
+    //   )}
+    // </>
+
+    <UMLClassInput/>
   );
 }
 
