@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 
 // Menu items.
-const paletteItems = [
+const paletteItems = [dw
   {
     category: "Class Elements",
     items: [
