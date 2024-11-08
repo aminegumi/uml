@@ -1,40 +1,46 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Heading from "./Components/navBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import AnimatedExample from "./Components/progressBar";
-import Body from "./Components/body"; // Import the Body component
-import LeftSideBar from "./Components/leftSideBar"; // Import the LeftSideBar component
-import RightSideBar from "./Components/rightSideBar"; // Import the RightSideBar component
+import Body from "./Components/body";
+import LeftSideBar from "./Components/leftSideBar";
+import RightSideBar from "./Components/rightSideBar";
+import { SidebarProvider } from "./Components/ui/sidebar";
+import { Container, Row } from "react-bootstrap";
 
 function App() {
-  // State to track loading status
   const [loading, setLoading] = useState(true);
 
-  // Simulate loading process
   useEffect(() => {
     const timer = setTimeout(() => {
-      setLoading(false); // Hide the progress bar after 2 seconds
-    }, 2000);
+      setLoading(false);
+    }, 500);
 
-    return () => clearTimeout(timer); // Cleanup the timer on unmount
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <>
       {loading ? (
-        <AnimatedExample /> // Show progress bar while loading
+        <AnimatedExample />
       ) : (
-        <>
+        <Container fluid className="p-0">
           <Heading />
-          <div style={{ display: "flex", height: "calc(100vh - 56px)" }}>
-            {" "}
-            {/* Adjust height based on Navbar */}
-            <LeftSideBar />
-            <Body />
-            <RightSideBar />
-          </div>
-        </>
+          <Row className="layout-container g-0">
+            <SidebarProvider>
+              <div className="sidebar-wrapper">
+                <LeftSideBar />
+              </div>
+              <main className="main-content">
+                <Body />
+              </main>
+              <div className="sidebar-wrapper">
+                <RightSideBar />
+              </div>
+            </SidebarProvider>
+          </Row>
+        </Container>
       )}
     </>
   );

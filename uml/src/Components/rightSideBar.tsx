@@ -1,49 +1,101 @@
-import React from "react";
+import {
+  Box,
+  Boxes,
+  GitFork,
+  Diamond,
+  ArrowRight,
+  ArrowLeftRight,
+  Component,
+  Circle,
+  Square,
+} from "lucide-react";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+} from "@/components/ui/sidebar";
+
+// Menu items.
+const paletteItems = [
+  {
+    category: "Class Elements",
+    items: [
+      { type: "class", icon: Box, label: "Class" },
+      { type: "interface", icon: Boxes, label: "Interface" },
+      { type: "abstract", icon: Component, label: "Abstract Class" },
+      { type: "enum", icon: Square, label: "Enumeration" },
+    ],
+  },
+  {
+    category: "Relationships",
+    items: [
+      { type: "inheritance", icon: GitFork, label: "Inheritance" },
+      { type: "implementation", icon: ArrowRight, label: "Implementation" },
+      { type: "association", icon: ArrowLeftRight, label: "Association" },
+      { type: "aggregation", icon: Diamond, label: "Aggregation" },
+      { type: "composition", icon: Circle, label: "Composition" },
+    ],
+  },
+];
 
 const RightSideBar = () => {
+  const handleDragStart = (event: React.DragEvent, elementType: string) => {
+    event.dataTransfer.setData("elementType", elementType);
+  };
+
+  // Menu items.
+  const paletteItems = [
+    {
+      category: "Class Elements",
+      items: [
+        { type: "class", icon: Box, label: "Class" },
+        { type: "interface", icon: Boxes, label: "Interface" },
+        { type: "abstract", icon: Component, label: "Abstract Class" },
+        { type: "enum", icon: Square, label: "Enumeration" },
+      ],
+    },
+    {
+      category: "Relationships",
+      items: [
+        { type: "inheritance", icon: GitFork, label: "Inheritance" },
+        { type: "implementation", icon: ArrowRight, label: "Implementation" },
+        { type: "association", icon: ArrowLeftRight, label: "Association" },
+        { type: "aggregation", icon: Diamond, label: "Aggregation" },
+        { type: "composition", icon: Circle, label: "Composition" },
+      ],
+    },
+  ];
+
   return (
-    <div
-      className="right-sidebar"
-      style={{
-        width: "200px",
-        backgroundColor: "#f8f9fa",
-        padding: "16px",
-        borderLeft: "1px solid #ccc",
-      }}
-    >
-      <h4>Palette</h4>
-      {/* Add your palette content here */}
-      <div>
-        <button
-          style={{
-            display: "block",
-            margin: "5px 0",
-            padding: "10px",
-            width: "100%",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
-          Add Class
-        </button>
-        <button
-          style={{
-            display: "block",
-            margin: "5px 0",
-            padding: "10px",
-            width: "100%",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
-          Add Relationship
-        </button>
-      </div>
-    </div>
+    <Sidebar side="right" variant="floating" className="my-14">
+      <SidebarContent>
+        {paletteItems.map((category) => (
+          <SidebarGroup key={category.category}>
+            <SidebarGroupLabel>{category.category}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="grid grid-cols-1 gap-2">
+                {category.items.map((item) => (
+                  <div
+                    key={item.type}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, item.type)}
+                    className="flex items-center gap-2 rounded-lg cursor-move hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="p-2 bg-white rounded shadow-sm">
+                      <item.icon className="w-6 h-6" />
+                    </div>
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+    </Sidebar>
   );
 };
 
