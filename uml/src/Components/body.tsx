@@ -1,18 +1,38 @@
 // body.tsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as go from "gojs";
+import ClassEditorDialog from "./classEditor";
+
+interface ClassAttributes {
+  name: string;
+  attributes: Array<{
+    id: number;
+    name: string;
+    type: string;
+    visibility: string;
+  }>;
+  methods: Array<{
+    id: number;
+    name: string;
+    properties: Array<{ name: string; type: string }>;
+    returnType: string;
+    visibility: string;
+  }>;
+}
 
 const Body: React.FC = () => {
   const diagramRef = useRef<go.Diagram | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentNodeData, setCurrentNodeData] = useState<any>(null);
 
   useEffect(() => {
     // Initialize GoJS diagram
     const $ = go.GraphObject.make;
-    
+
     const diagram = new go.Diagram("myDiagramDiv", {
       "undoManager.isEnabled": true,
       layout: new go.GridLayout({
-        alignment: go.GridLayout.Position, // Align nodes at the center of each grid cell
+        // alignment: go.GridLayout.Position, // Align nodes at the center of each grid cell (to see another time)
         cellSize: new go.Size(100, 100), // Set size of each grid cell
         spacing: new go.Size(20, 20), // Space between grid cells
         wrappingWidth: Infinity,
@@ -20,48 +40,88 @@ const Body: React.FC = () => {
     });
 
     // Class node template
-    diagram.nodeTemplate = $(go.Node, "Auto",
+    diagram.nodeTemplate = $(
+      go.Node,
+      "Auto",
       {
         locationSpot: go.Spot.Center,
         fromSpot: go.Spot.AllSides,
-        toSpot: go.Spot.AllSides
+        toSpot: go.Spot.AllSides,
       },
-      $(go.Shape, "Rectangle",
+      $(
+        go.Shape,
+        "Rectangle",
         { fill: "white" },
-        new go.Binding("fill", "isHighlighted", h => h ? "lightblue" : "white").ofObject()),
-      $(go.Panel, "Table",
+        new go.Binding("fill", "isHighlighted", (h) => (h ? "lightblue" : "white")).ofObject()
+      ),
+      $(
+        go.Panel,
+        "Table",
         { defaultAlignment: go.Spot.Left, margin: 4 },
         $(go.RowColumnDefinition, { row: 0, background: "#F0F0F0" }),
-        $(go.TextBlock,
+        // Class name
+        $(
+          go.TextBlock,
           { row: 0, margin: 3, font: "bold 12px sans-serif" },
-          new go.Binding("text", "name")),
-        $(go.Panel, "Vertical",
+          new go.Binding("text", "name")
+        ),
+        // Attributes
+        $(
+          go.Panel,
+          "Vertical",
           { row: 1, margin: 3 },
-          new go.Binding("itemArray", "properties"),
+          new go.Binding("itemArray", "attributes"),
           {
-            itemTemplate: $(go.Panel, "Auto",
-              $(go.TextBlock,
+            itemTemplate: $(
+              go.Panel,
+              "Auto",
+              $(
+                go.TextBlock,
                 { margin: new go.Margin(0, 0, 0, 0) },
-                new go.Binding("text", "name"))
-            )
+                new go.Binding(
+                  "text",
+                  "",
+                  (data) => `${data.visibility} ${data.name}: ${data.type}`
+                )
+              )
+            ),
           }
         ),
-        $(go.Panel, "Vertical",
-          { row: 2, margin: 3 },
+        // Separator line
+        $(
+          go.Shape,
+          "LineH",
+          { row: 2, stroke: "black", strokeWidth: 1, stretch: go.GraphObject.Horizontal }
+        ),
+        // Methods
+        $(
+          go.Panel,
+          "Vertical",
+          { row: 3, margin: 3 },
           new go.Binding("itemArray", "methods"),
           {
-            itemTemplate: $(go.Panel, "Auto",
-              $(go.TextBlock,
+            itemTemplate: $(
+              go.Panel,
+              "Auto",
+              $(
+                go.TextBlock,
                 { margin: new go.Margin(0, 0, 0, 0) },
-                new go.Binding("text", "name"))
-            )
+                new go.Binding(
+                  "text",
+                  "",
+                  (data) => `${data.visibility} ${data.name}(): ${data.returnType}`
+                )
+              )
+            ),
           }
         )
       )
     );
+    
 
     // Link template
-    diagram.linkTemplate = $(go.Link,
+    diagram.linkTemplate = $(
+      go.Link,
       { routing: go.Link.AvoidsNodes },
       $(go.Shape),
       $(go.Shape, { toArrow: "Standard" })
@@ -82,64 +142,31 @@ const Body: React.FC = () => {
     event.preventDefault();
     const elementType = event.dataTransfer.getData("elementType");
     const diagram = diagramRef.current;
-    
-    if (diagram) {
+
+    if (diagram && elementType === "class") {
       const canvasPoint = diagram.transformViewToDoc(
         new go.Point(event.clientX, event.clientY)
       );
+      setCurrentNodeData({
+        key: Date.now(),
+        loc: `${canvasPoint.x} ${canvasPoint.y}`,
+      });
+      setIsDialogOpen(true);
+    }
+  };
 
-      let nodeData: go.ObjectData | null = null;
-      
-      switch (elementType) {
-        case "class":
-          nodeData = {
-            key: Date.now(),
-            name: "NewClass",
-            properties: [{ name: "property1: Type" }],
-            methods: [{ name: "method1(): ReturnType" }],
-            category: "class",
-            loc: `${canvasPoint.x} ${canvasPoint.y}` // Set location directly
-          };
-          break;
-        case "interface":
-          nodeData = {
-            key: Date.now(),
-            name: "NewInterface",
-            properties: [],
-            methods: [{ name: "method1(): ReturnType" }],
-            category: "interface",
-            loc: `${canvasPoint.x} ${canvasPoint.y}`
-          };
-          break;
-        case "abstract":
-          nodeData = {
-            key: Date.now(),
-            name: "AbstractClass",
-            properties: [],
-            methods: [{ name: "abstractMethod(): void" }],
-            category: "abstract",
-            loc: `${canvasPoint.x} ${canvasPoint.y}`
-          };
-          break;
-        case "enum":
-          nodeData = {
-            key: Date.now(),
-            name: "Enumeration",
-            properties: [{ name: "enum1: Type" }, { name: "enum2: Type" }],
-            category: "enum",
-            loc: `${canvasPoint.x} ${canvasPoint.y}`
-          };
-          break;
-        default:
-          return; // Exit if element type is unknown
-      }
-
-      if (nodeData) {
-        // Add the node data to the model
-        diagram.model.addNodeData(nodeData);
-        // Commit the transaction
-        diagram.commitTransaction("added node");
-      }
+  const handleDialogSubmit = (classData: ClassAttributes) => {
+    const diagram = diagramRef.current;
+    if (diagram && currentNodeData) {
+      const nodeData = {
+        ...currentNodeData,
+        name: classData.name,
+        attributes: classData.attributes,
+        methods: classData.methods,
+        category: "class",
+      };
+      diagram.model.addNodeData(nodeData);
+      diagram.commitTransaction("added node");
     }
   };
 
@@ -151,9 +178,14 @@ const Body: React.FC = () => {
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       />
+      <ClassEditorDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSubmit={handleDialogSubmit}
+      />
     </div>
   );
 };
 
 export default Body;
-// to commit
+
