@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as go from "gojs";
 import ClassEditorDialog from "./classEditor";
+import InterfaceEditorDialog from "./interfaceEditor";
 
 interface ClassAttributes {
   name: string;
@@ -24,22 +25,21 @@ const Body: React.FC = () => {
   const diagramRef = useRef<go.Diagram | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentNodeData, setCurrentNodeData] = useState<any>(null);
+  const [editingNode, setEditingNode] = useState<go.Node | null>(null);
 
   useEffect(() => {
-    // Initialize GoJS diagram
     const $ = go.GraphObject.make;
 
     const diagram = new go.Diagram("myDiagramDiv", {
       "undoManager.isEnabled": true,
       layout: new go.GridLayout({
-        // alignment: go.GridLayout.Position, // Align nodes at the center of each grid cell (to see another time)
-        cellSize: new go.Size(100, 100), // Set size of each grid cell
-        spacing: new go.Size(20, 20), // Space between grid cells
+        cellSize: new go.Size(100, 100),
+        spacing: new go.Size(20, 20),
         wrappingWidth: Infinity,
       }),
     });
 
-    // Class node template
+    // Add click handling to the node template
     diagram.nodeTemplate = $(
       go.Node,
       "Auto",
@@ -47,6 +47,22 @@ const Body: React.FC = () => {
         locationSpot: go.Spot.Center,
         fromSpot: go.Spot.AllSides,
         toSpot: go.Spot.AllSides,
+        // Fixed click handler type
+        click: function(e: go.InputEvent, obj: go.GraphObject) {
+          const node = obj.part as go.Node;
+          if (node) {
+            setEditingNode(node);
+            const nodeData = node.data;
+            setCurrentNodeData({
+              key: nodeData.key,
+              loc: nodeData.loc,
+              name: nodeData.name,
+              attributes: nodeData.attributes || [],
+              methods: nodeData.methods || [],
+            });
+            setIsDialogOpen(true);
+          }
+        }
       },
       $(
         go.Shape,
@@ -59,13 +75,11 @@ const Body: React.FC = () => {
         "Table",
         { defaultAlignment: go.Spot.Left, margin: 4 },
         $(go.RowColumnDefinition, { row: 0, background: "#F0F0F0" }),
-        // Class name
         $(
           go.TextBlock,
           { row: 0, margin: 3, font: "bold 12px sans-serif" },
           new go.Binding("text", "name")
         ),
-        // Attributes
         $(
           go.Panel,
           "Vertical",
@@ -87,13 +101,11 @@ const Body: React.FC = () => {
             ),
           }
         ),
-        // Separator line
         $(
           go.Shape,
           "LineH",
           { row: 2, stroke: "black", strokeWidth: 1, stretch: go.GraphObject.Horizontal }
         ),
-        // Methods
         $(
           go.Panel,
           "Vertical",
@@ -117,9 +129,7 @@ const Body: React.FC = () => {
         )
       )
     );
-    
 
-    // Link template
     diagram.linkTemplate = $(
       go.Link,
       { routing: go.Link.AvoidsNodes },
@@ -147,10 +157,15 @@ const Body: React.FC = () => {
       const canvasPoint = diagram.transformViewToDoc(
         new go.Point(event.clientX, event.clientY)
       );
+      // Reset currentNodeData with empty values for new class
       setCurrentNodeData({
         key: Date.now(),
         loc: `${canvasPoint.x} ${canvasPoint.y}`,
+        name: "",
+        attributes: [],
+        methods: [],
       });
+      setEditingNode(null); // Clear editing node as this is a new node
       setIsDialogOpen(true);
     }
   };
@@ -165,9 +180,21 @@ const Body: React.FC = () => {
         methods: classData.methods,
         category: "class",
       };
-      diagram.model.addNodeData(nodeData);
-      diagram.commitTransaction("added node");
+
+      if (editingNode) {
+        // Update existing node
+        diagram.model.setDataProperty(editingNode.data, "name", classData.name);
+        diagram.model.setDataProperty(editingNode.data, "attributes", classData.attributes);
+        diagram.model.setDataProperty(editingNode.data, "methods", classData.methods);
+      } else {
+        // Add new node
+        diagram.model.addNodeData(nodeData);
+      }
+      
+      diagram.commitTransaction("updated class");
     }
+    setIsDialogOpen(false);
+    setEditingNode(null);
   };
 
   return (
@@ -180,12 +207,15 @@ const Body: React.FC = () => {
       />
       <ClassEditorDialog
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setEditingNode(null);
+        }}
         onSubmit={handleDialogSubmit}
+        initialData={currentNodeData}
       />
     </div>
   );
 };
 
 export default Body;
-
