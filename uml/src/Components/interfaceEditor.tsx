@@ -5,75 +5,53 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/Components/ui/dialog";
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/Components/ui/select";
-import { Input } from "@/Components/ui/input";
-import { Button } from "@/Components/ui/button";
-import { Label } from "@/Components/ui/label";
-
-interface Attribute {
-  id: number;
-  name: string;
-  type: string;
-  visibility: string;
-}
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 interface Method {
   id: number;
   name: string;
-  properties: { name: string; type: string }[];
   returnType: string;
   visibility: string;
+  properties: { name: string; type: string }[]; // Adding properties for methods
 }
 
-interface ClassAttributes {
+interface InterfaceAttributes {
   name: string;
-  attributes: Attribute[];
   methods: Method[];
 }
 
-interface ClassEditorDialogProps {
+interface InterfaceEditorDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (classData: ClassAttributes) => void;
-  initialData?: ClassAttributes;
+  onSubmit: (interfaceData: InterfaceAttributes) => void;
+  initialData?: InterfaceAttributes;
 }
 
 const dataTypes = ["string", "float", "int", "double", "bool", "date"];
 const visibilityTypes = ["public", "private", "protected", "package"];
 
-const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
+const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
   isOpen,
   onClose,
   onSubmit,
   initialData,
 }) => {
-  const [classData, setClassData] = useState<ClassAttributes>(
-    initialData || {
-      name: "",
-      attributes: [],
-      methods: [],
-    }
+  const [interfaceData, setInterfaceData] = useState<InterfaceAttributes>(
+    initialData || { name: "", methods: [] }
   );
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setClassData({ ...classData, name: e.target.value });
-  };
-
-  const handleAttributeChange = (
-    index: number,
-    field: "name" | "type" | "visibility",
-    value: string
-  ) => {
-    const attributes = [...classData.attributes];
-    attributes[index][field] = value;
-    setClassData({ ...classData, attributes });
+    setInterfaceData({ ...interfaceData, name: e.target.value });
   };
 
   const handleMethodChange = (
@@ -81,9 +59,9 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     field: "name" | "returnType" | "visibility",
     value: string
   ) => {
-    const methods = [...classData.methods];
+    const methods = [...interfaceData.methods];
     methods[methodIndex][field] = value;
-    setClassData({ ...classData, methods });
+    setInterfaceData({ ...interfaceData, methods });
   };
 
   const handleMethodPropertyChange = (
@@ -92,68 +70,47 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     field: "name" | "type",
     value: string
   ) => {
-    const methods = [...classData.methods];
+    const methods = [...interfaceData.methods];
     methods[methodIndex].properties[propertyIndex][field] = value;
-    setClassData({ ...classData, methods });
-  };
-
-  const addAttribute = () => {
-    setClassData({
-      ...classData,
-      attributes: [
-        ...classData.attributes,
-        {
-          id: classData.attributes.length,
-          name: "",
-          type: "string",
-          visibility: "public",
-        },
-      ],
-    });
+    setInterfaceData({ ...interfaceData, methods });
   };
 
   const addMethod = () => {
-    setClassData({
-      ...classData,
+    setInterfaceData({
+      ...interfaceData,
       methods: [
-        ...classData.methods,
+        ...interfaceData.methods,
         {
-          id: classData.methods.length,
+          id: interfaceData.methods.length,
           name: "",
-          properties: [],
           returnType: "void",
           visibility: "public",
+          properties: [], // Initial empty properties for each method
         },
       ],
     });
   };
 
   const addMethodProperty = (methodIndex: number) => {
-    const methods = [...classData.methods];
+    const methods = [...interfaceData.methods];
     methods[methodIndex].properties.push({ name: "", type: "string" });
-    setClassData({ ...classData, methods });
-  };
-
-  const removeAttribute = (index: number) => {
-    const attributes = [...classData.attributes];
-    attributes.splice(index, 1);
-    setClassData({ ...classData, attributes });
+    setInterfaceData({ ...interfaceData, methods });
   };
 
   const removeMethod = (index: number) => {
-    const methods = [...classData.methods];
+    const methods = [...interfaceData.methods];
     methods.splice(index, 1);
-    setClassData({ ...classData, methods });
+    setInterfaceData({ ...interfaceData, methods });
   };
 
   const removeMethodProperty = (methodIndex: number, propertyIndex: number) => {
-    const methods = [...classData.methods];
+    const methods = [...interfaceData.methods];
     methods[methodIndex].properties.splice(propertyIndex, 1);
-    setClassData({ ...classData, methods });
+    setInterfaceData({ ...interfaceData, methods });
   };
 
   const handleSubmit = () => {
-    onSubmit(classData);
+    onSubmit(interfaceData);
     onClose();
   };
 
@@ -161,92 +118,26 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Class Editor</DialogTitle>
+          <DialogTitle>Interface Editor</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Class Name */}
+          {/* Interface Name */}
           <div className="space-y-2">
-            <Label htmlFor="className">Class Name</Label>
+            <Label htmlFor="interfaceName">Interface Name</Label>
             <Input
-              id="className"
-              value={classData.name}
+              id="interfaceName"
+              value={interfaceData.name}
               onChange={handleNameChange}
-              placeholder="Enter class name"
+              placeholder="Enter interface name"
             />
-          </div>
-
-          {/* Attributes */}
-          <div className="space-y-2 ">
-            <Label className="mr-8">Attributes</Label>
-            {classData.attributes.map((attr, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <Input
-                  value={attr.name}
-                  onChange={(e) =>
-                    handleAttributeChange(index, "name", e.target.value)
-                  }
-                  placeholder="Attribute name"
-                  className="flex-1"
-                />
-                <Select
-                  value={attr.type}
-                  onValueChange={(value) =>
-                    handleAttributeChange(index, "type", value)
-                  }
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {dataTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={attr.visibility}
-                  onValueChange={(value) =>
-                    handleAttributeChange(index, "visibility", value)
-                  }
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {visibilityTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeAttribute(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addAttribute}
-            >
-              Add Attribute
-            </Button>
           </div>
 
           {/* Methods */}
           <div className="space-y-2">
             <Label className="mr-8">Methods</Label>
-            {classData.methods.map((method, methodIndex) => (
-              <div key={methodIndex} className="space-y-2 border p-2 rounded">
+            {interfaceData.methods.map((method, methodIndex) => (
+              <div key={method.id} className="space-y-2 border p-2 rounded">
                 <div className="flex items-center gap-2">
                   <Input
                     value={method.name}
@@ -298,6 +189,8 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
+
+                {/* Method Properties */}
                 <div className="pl-8">
                   {method.properties.map((prop, propIndex) => (
                     <div key={propIndex} className="flex items-center gap-2 mt-2">
@@ -381,4 +274,4 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
   );
 };
 
-export default ClassEditorDialog;
+export default InterfaceEditorDialog;
