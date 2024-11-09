@@ -1,20 +1,3 @@
-// import React from "react";
-// import { Container, Row, Col } from "react-bootstrap";
-// import { Boxes, Box, Code2, FileJson, CodeSquare, Terminal } from "lucide-react";
-
-// const LeftSideBar = () => {
-//   return (
-//     <Col xs={2} className="bg-gray-100 border-right p-4 position-fixed top-10 bottom-0 start-0 overflow-auto">
-//       <h4>Hierarchy</h4>
-//       <ul className="list-unstyled">
-//         <li>Class 1</li>
-//         <li>Class 2</li>
-//         <li>Class 3</li>
-//       </ul>
-//     </Col>
-//   );
-// };
-
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 
 import {
@@ -26,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/Components/ui/sidebar";
+} from "@/components/ui/sidebar";
 
 // Menu items.
 const items = [

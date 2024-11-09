@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import Heading from "./Components/navBar";
+import Heading from "./components/navBar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import AnimatedExample from "./Components/progressBar";
-import Body from "./Components/body";
-import LeftSideBar from "./Components/leftSideBar";
-import RightSideBar from "./Components/rightSideBar";
-import { SidebarProvider } from "./Components/ui/sidebar";
+import AnimatedExample from "./components/progressBar";
+import Body from "./components/body";
+import LeftSideBar from "./components/leftSideBar";
+import RightSideBar from "./components/rightSideBar";
+import { SidebarProvider } from "./components/ui/sidebar";
 import { Container, Row } from "react-bootstrap";
 
 function App() {
