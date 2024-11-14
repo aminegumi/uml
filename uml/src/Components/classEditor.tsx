@@ -43,9 +43,20 @@ interface ClassEditorDialogProps {
   onClose: () => void;
   onSubmit: (classData: ClassAttributes) => void;
   initialData?: {
-    name: string;
-    attributes: Attribute[];
-    methods: Method[];
+    name?: string;
+    attributes?: Array<{
+      id: number;
+      name: string;
+      type: string;
+      visibility: string;
+    }>;
+    methods?: Array<{
+      id: number;
+      name: string;
+      properties: Array<{ name: string; type: string }>;
+      returnType: string;
+      visibility: string;
+    }>;
   };
 }
 
@@ -70,12 +81,12 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     if (isOpen) {
       if (initialData) {
         setClassData({
-          name: initialData.name,
-          attributes: initialData.attributes.map((attr, index) => ({
+          name: initialData.name || "",
+          attributes: (initialData.attributes || []).map((attr, index) => ({
             ...attr,
             id: index,
           })),
-          methods: initialData.methods.map((method, index) => ({
+          methods: (initialData.methods || []).map((method, index) => ({
             ...method,
             id: index,
           })),
@@ -354,7 +365,10 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                 </div>
                 <div className="pl-8">
                   {method.properties.map((prop, propIndex) => (
-                    <div key={propIndex} className="flex items-center gap-2 mt-2">
+                    <div
+                      key={propIndex}
+                      className="flex items-center gap-2 mt-2"
+                    >
                       <Input
                         value={prop.name}
                         onChange={(e) =>
@@ -413,7 +427,12 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                 </div>
               </div>
             ))}
-            <Button type="button" variant="outline" size="sm" onClick={addMethod}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addMethod}
+            >
               Add Method
             </Button>
           </div>

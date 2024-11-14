@@ -25,6 +25,7 @@ interface Method {
 }
 
 interface InterfaceAttributes {
+  label: "<<Interface>>";
   name: string;
   methods: Method[];
   extends?: string; // Optional interface extension
@@ -35,6 +36,7 @@ interface InterfaceEditorDialogProps {
   onClose: () => void;
   onSubmit: (interfaceData: InterfaceAttributes) => void;
   initialData?: {
+    label: "<<Interface>>";
     name: string;
     methods: Method[];
     extends?: string;
@@ -42,6 +44,7 @@ interface InterfaceEditorDialogProps {
 }
 
 const emptyInterfaceData: InterfaceAttributes = {
+  label: "<<Interface>>",
   name: "",
   methods: [],
   extends: "",
@@ -61,6 +64,7 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
     if (isOpen) {
       if (initialData) {
         setInterfaceData({
+          label: "<<Interface>>",
           name: initialData.name,
           methods: initialData.methods.map((method, index) => ({
             ...method,
