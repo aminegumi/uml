@@ -3,6 +3,25 @@ import * as go from "gojs";
 import ClassEditorDialog from "./classEditor";
 import InterfaceEditorDialog from "./interfaceEditor";
 import EnumEditorDialog from "./enumEditor";
+import AbstracClassEditorDialog from "./AbstractClassEditor";
+
+interface AbstractClassAttributes {
+  label: "<<abstract>>";
+  name: string;
+  attributes: Array<{
+    id: number;
+    name: string;
+    type: string;
+    visibility: string;
+  }>;
+  methods: Array<{
+    id: number;
+    name: string;
+    properties: Array<{ name: string; type: string }>;
+    returnType: string;
+    visibility: string;
+  }>;
+}
 
 interface EnumAttributes {
   label: "<<enumeration>>";
@@ -49,6 +68,8 @@ const Body: React.FC = () => {
   const [isClassDialogOpen, setIsClassDialogOpen] = useState(false);
   const [isInterfaceDialogOpen, setIsInterfaceDialogOpen] = useState(false);
   const [isEnumDialogOpen, setIsEnumDialogOpen] = useState(false);
+  const [isAbstractClassDialogOpen, setIsAbstractClassDialogOpen] =
+    useState(false);
   const [currentNodeData, setCurrentNodeData] = useState<any>(null);
   const [editingNode, setEditingNode] = useState<go.Node | null>(null);
 
@@ -90,6 +111,8 @@ const Body: React.FC = () => {
               setIsInterfaceDialogOpen(true);
             } else if (nodeData.category === "enum") {
               setIsEnumDialogOpen(true);
+            } else if (nodeData.category === "abstract") {
+              setIsAbstractClassDialogOpen(true);
             } else {
               setIsClassDialogOpen(true);
             }
@@ -166,6 +189,104 @@ const Body: React.FC = () => {
       )
     );
 
+    // Abstract Class Template
+    diagram.nodeTemplateMap.add(
+      "abstract",
+      $(
+        go.Node,
+        "Auto",
+        {
+          locationSpot: go.Spot.Center,
+          fromSpot: go.Spot.AllSides,
+          toSpot: go.Spot.AllSides,
+          click: function (e: go.InputEvent, obj: go.GraphObject) {
+            const node = obj.part as go.Node;
+            if (node) {
+              setEditingNode(node);
+              const nodeData = node.data;
+              setCurrentNodeData({
+                key: nodeData.key,
+                loc: nodeData.loc,
+                name: nodeData.name,
+                attributes: nodeData.attributes || [],
+                methods: nodeData.methods || [],
+                category: "abstract", 
+              });
+              setIsAbstractClassDialogOpen(true);
+            }
+          },
+        },
+        $(
+          go.Shape,
+          "Rectangle",
+          { fill: "white" },
+          new go.Binding("fill", "isHighlighted", (h) =>
+            h ? "lightblue" : "white"
+          ).ofObject()
+        ),
+        $(
+          go.Panel,
+          "Table",
+          { defaultAlignment: go.Spot.Left, margin: 4 },
+          $(go.RowColumnDefinition, { row: 0, background: "#F0F0F0" }),
+          $(
+            go.TextBlock,
+            { row: 0, margin: 3, font: "bold 12px sans-serif" },
+            new go.Binding("text", "name")
+          ),
+          $(
+            go.Panel,
+            "Vertical",
+            { row: 1, margin: 3 },
+            new go.Binding("itemArray", "attributes"),
+            {
+              itemTemplate: $(
+                go.Panel,
+                "Auto",
+                $(
+                  go.TextBlock,
+                  { margin: new go.Margin(0, 0, 0, 0) },
+                  new go.Binding(
+                    "text",
+                    "",
+                    (data) => `${data.visibility} ${data.name}: ${data.type}`
+                  )
+                )
+              ),
+            }
+          ),
+          $(go.Shape, "LineH", {
+            row: 2,
+            stroke: "black",
+            strokeWidth: 1,
+            stretch: go.GraphObject.Horizontal,
+          }),
+          $(
+            go.Panel,
+            "Vertical",
+            { row: 3, margin: 3 },
+            new go.Binding("itemArray", "methods"),
+            {
+              itemTemplate: $(
+                go.Panel,
+                "Auto",
+                $(
+                  go.TextBlock,
+                  { margin: new go.Margin(0, 0, 0, 0) },
+                  new go.Binding(
+                    "text",
+                    "",
+                    (data) =>
+                      `${data.visibility} ${data.name}(): ${data.returnType}`
+                  )
+                )
+              ),
+            }
+          )
+        )
+      )
+    );
+
     // Interface template
     diagram.nodeTemplateMap.add(
       "interface",
@@ -231,7 +352,7 @@ const Body: React.FC = () => {
                 )
               ),
             }
-          ),
+          )
         )
       )
     );
@@ -296,7 +417,7 @@ const Body: React.FC = () => {
                 )
               ),
             }
-          ),
+          )
         )
       )
     );
@@ -364,6 +485,18 @@ const Body: React.FC = () => {
         });
         setEditingNode(null);
         setIsEnumDialogOpen(true);
+      } else if (elementType === "abstract") {
+        setCurrentNodeData({
+          key: Date.now(),
+          loc: `${canvasPoint.x} ${canvasPoint.y}`,
+          label: "<<abstract>>",
+          name: "",
+          attributes: [],
+          methods: [],
+          category: "abstract",
+        });
+        setEditingNode(null);
+        setIsAbstractClassDialogOpen(true);
       }
     }
   };
@@ -462,6 +595,39 @@ const Body: React.FC = () => {
     setCurrentNodeData(null);
   };
 
+
+  const handleAbstractClassDialogSubmit = (data: AbstractClassAttributes) => {
+    const diagram = diagramRef.current;
+    if (diagram && currentNodeData) {
+      const nodeData = {
+        ...currentNodeData,
+        name: "<<abstract>>\n" +data.name,
+        attributes: data.attributes,
+        methods: data.methods,
+        category: "abstract",
+      };
+
+      if (editingNode) {
+        diagram.model.setDataProperty(editingNode.data, "name", data.name);
+        diagram.model.setDataProperty(
+          editingNode.data,
+          "attributes",
+          data.attributes
+        );
+        diagram.model.setDataProperty(
+          editingNode.data,
+          "methods",
+          data.methods
+        );
+      } else {
+        diagram.model.addNodeData(nodeData);
+      }
+    }
+    setIsAbstractClassDialogOpen(false);
+    setEditingNode(null);
+    setCurrentNodeData(null);
+  };
+
   return (
     <div className="body">
       <div
@@ -499,6 +665,16 @@ const Body: React.FC = () => {
         }}
         onSubmit={handleEnumDialogSubmit}
         initialData={currentNodeData}
+      />
+      <AbstracClassEditorDialog 
+      isOpen={isAbstractClassDialogOpen}
+      onClose={() => {
+        setIsAbstractClassDialogOpen(false);
+        setEditingNode(null);
+        setCurrentNodeData(null);
+      }}
+      onSubmit={handleAbstractClassDialogSubmit}
+      initialData={currentNodeData}
       />
     </div>
   );
