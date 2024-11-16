@@ -32,16 +32,17 @@ interface Method {
   visibility: string;
 }
 
-interface ClassAttributes {
+interface AbstractClassAttributes {
+  label: "<<abstract>>";
   name: string;
   attributes: Attribute[];
   methods: Method[];
 }
 
-interface ClassEditorDialogProps {
+interface AbstractAbstracClassEditorDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (classData: ClassAttributes) => void;
+  onSubmit: (classData: AbstractClassAttributes) => void;
   initialData?: {
     name?: string;
     attributes?: Array<{
@@ -60,7 +61,8 @@ interface ClassEditorDialogProps {
   };
 }
 
-const emptyClassData: ClassAttributes = {
+const emptyAbstractClassData: AbstractClassAttributes = {
+  label: "<<abstract>>",
   name: "",
   attributes: [],
   methods: [],
@@ -69,18 +71,21 @@ const emptyClassData: ClassAttributes = {
 const dataTypes = ["string", "float", "int", "double", "bool", "date", "void"];
 const visibilityTypes = ["public", "private", "protected", "package"];
 
-const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
+const AbstracClassEditorDialog: React.FC<AbstractAbstracClassEditorDialogProps> = ({
   isOpen,
   onClose,
   onSubmit,
   initialData,
 }) => {
-  const [classData, setClassData] = useState<ClassAttributes>(emptyClassData);
+  const [classData, setClassData] = useState<AbstractClassAttributes>(
+    emptyAbstractClassData
+  );
 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
         setClassData({
+          label: "<<abstract>>",
           name: initialData.name || "",
           attributes: (initialData.attributes || []).map((attr, index) => ({
             ...attr,
@@ -92,7 +97,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
           })),
         });
       } else {
-        setClassData(emptyClassData);
+        setClassData(emptyAbstractClassData);
       }
     }
   }, [isOpen, initialData]);
@@ -225,19 +230,19 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Class" : "Create New Class"}
+            {initialData ? "Edit Abstract Class" : "Create New Abstract Class"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Class Name */}
           <div className="space-y-2">
-            <Label htmlFor="className">Class Name</Label>
+            <Label htmlFor="className">Abstract Class Name</Label>
             <Input
               id="className"
               value={classData.name}
               onChange={handleNameChange}
-              placeholder="Enter class name"
+              placeholder="Enter abstract class name"
             />
           </div>
 
@@ -449,4 +454,4 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
   );
 };
 
-export default ClassEditorDialog;
+export default AbstracClassEditorDialog;

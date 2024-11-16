@@ -17,100 +17,73 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-interface Attribute {
-  id: number;
-  name: string;
-  type: string;
-  visibility: string;
-}
-
 interface Method {
   id: number;
   name: string;
   properties: { name: string; type: string }[];
   returnType: string;
-  visibility: string;
 }
 
-interface ClassAttributes {
+interface InterfaceAttributes {
+  label: "<<Interface>>";
   name: string;
-  attributes: Attribute[];
   methods: Method[];
+  extends?: string; // Optional interface extension
 }
 
-interface ClassEditorDialogProps {
+interface InterfaceEditorDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (classData: ClassAttributes) => void;
+  onSubmit: (interfaceData: InterfaceAttributes) => void;
   initialData?: {
-    name?: string;
-    attributes?: Array<{
-      id: number;
-      name: string;
-      type: string;
-      visibility: string;
-    }>;
-    methods?: Array<{
-      id: number;
-      name: string;
-      properties: Array<{ name: string; type: string }>;
-      returnType: string;
-      visibility: string;
-    }>;
+    label: "<<Interface>>";
+    name: string;
+    methods: Method[];
+    extends?: string;
   };
 }
 
-const emptyClassData: ClassAttributes = {
+const emptyInterfaceData: InterfaceAttributes = {
+  label: "<<Interface>>",
   name: "",
-  attributes: [],
   methods: [],
+  extends: "",
 };
 
 const dataTypes = ["string", "float", "int", "double", "bool", "date", "void"];
-const visibilityTypes = ["public", "private", "protected", "package"];
 
-const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
+const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
   isOpen,
   onClose,
   onSubmit,
   initialData,
 }) => {
-  const [classData, setClassData] = useState<ClassAttributes>(emptyClassData);
+  const [interfaceData, setInterfaceData] = useState<InterfaceAttributes>(emptyInterfaceData);
 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        setClassData({
-          name: initialData.name || "",
-          attributes: (initialData.attributes || []).map((attr, index) => ({
-            ...attr,
-            id: index,
-          })),
-          methods: (initialData.methods || []).map((method, index) => ({
+        setInterfaceData({
+          label: "<<Interface>>",
+          name: initialData.name,
+          methods: initialData.methods.map((method, index) => ({
             ...method,
             id: index,
           })),
+          extends: initialData.extends,
         });
       } else {
-        setClassData(emptyClassData);
+        setInterfaceData(emptyInterfaceData);
       }
     }
   }, [isOpen, initialData]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setClassData((prev) => ({ ...prev, name: e.target.value }));
+    setInterfaceData((prev) => ({ ...prev, name: e.target.value }));
   };
 
-  const handleAttributeChange = (
-    index: number,
-    field: keyof Attribute,
-    value: string
-  ) => {
-    setClassData((prev) => {
-      const attributes = [...prev.attributes];
-      attributes[index] = { ...attributes[index], [field]: value };
-      return { ...prev, attributes };
-    });
+  const handleExtendsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInterfaceData((prev) => ({ ...prev, extends: e.target.value }));
   };
 
   const handleMethodChange = (
@@ -118,7 +91,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     field: keyof Method,
     value: string
   ) => {
-    setClassData((prev) => {
+    setInterfaceData((prev) => {
       const methods = [...prev.methods];
       methods[methodIndex] = { ...methods[methodIndex], [field]: value };
       return { ...prev, methods };
@@ -131,7 +104,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     field: "name" | "type",
     value: string
   ) => {
-    setClassData((prev) => {
+    setInterfaceData((prev) => {
       const methods = [...prev.methods];
       methods[methodIndex] = {
         ...methods[methodIndex],
@@ -143,23 +116,8 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     });
   };
 
-  const addAttribute = () => {
-    setClassData((prev) => ({
-      ...prev,
-      attributes: [
-        ...prev.attributes,
-        {
-          id: prev.attributes.length,
-          name: "",
-          type: "string",
-          visibility: "public",
-        },
-      ],
-    }));
-  };
-
   const addMethod = () => {
-    setClassData((prev) => ({
+    setInterfaceData((prev) => ({
       ...prev,
       methods: [
         ...prev.methods,
@@ -168,14 +126,13 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
           name: "",
           properties: [],
           returnType: "void",
-          visibility: "public",
         },
       ],
     }));
   };
 
   const addMethodProperty = (methodIndex: number) => {
-    setClassData((prev) => {
+    setInterfaceData((prev) => {
       const methods = [...prev.methods];
       methods[methodIndex] = {
         ...methods[methodIndex],
@@ -188,22 +145,15 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     });
   };
 
-  const removeAttribute = (index: number) => {
-    setClassData((prev) => ({
-      ...prev,
-      attributes: prev.attributes.filter((_, i) => i !== index),
-    }));
-  };
-
   const removeMethod = (index: number) => {
-    setClassData((prev) => ({
+    setInterfaceData((prev) => ({
       ...prev,
       methods: prev.methods.filter((_, i) => i !== index),
     }));
   };
 
   const removeMethodProperty = (methodIndex: number, propertyIndex: number) => {
-    setClassData((prev) => {
+    setInterfaceData((prev) => {
       const methods = [...prev.methods];
       methods[methodIndex] = {
         ...methods[methodIndex],
@@ -216,7 +166,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
   };
 
   const handleSubmit = () => {
-    onSubmit(classData);
+    onSubmit(interfaceData);
     onClose();
   };
 
@@ -225,92 +175,37 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Class" : "Create New Class"}
+            {initialData ? "Edit Interface" : "Create New Interface"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Class Name */}
+          {/* Interface Name */}
           <div className="space-y-2">
-            <Label htmlFor="className">Class Name</Label>
+            <Label htmlFor="interfaceName">Interface Name</Label>
             <Input
-              id="className"
-              value={classData.name}
+              id="interfaceName"
+              value={interfaceData.name}
               onChange={handleNameChange}
-              placeholder="Enter class name"
+              placeholder="Enter interface name"
             />
           </div>
 
-          {/* Attributes */}
+          {/* Extends */}
           <div className="space-y-2">
-            <Label className="mr-8">Attributes</Label>
-            {classData.attributes.map((attr, index) => (
-              <div key={attr.id} className="flex items-center gap-2">
-                <Input
-                  value={attr.name}
-                  onChange={(e) =>
-                    handleAttributeChange(index, "name", e.target.value)
-                  }
-                  placeholder="Attribute name"
-                  className="flex-1"
-                />
-                <Select
-                  value={attr.type}
-                  onValueChange={(value) =>
-                    handleAttributeChange(index, "type", value)
-                  }
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {dataTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={attr.visibility}
-                  onValueChange={(value) =>
-                    handleAttributeChange(index, "visibility", value)
-                  }
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {visibilityTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeAttribute(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addAttribute}
-            >
-              Add Attribute
-            </Button>
+            <Label htmlFor="extends">Extends (Optional)</Label>
+            <Input
+              id="extends"
+              value={interfaceData.extends}
+              onChange={handleExtendsChange}
+              placeholder="Enter interface to extend"
+            />
           </div>
 
           {/* Methods */}
           <div className="space-y-2">
             <Label className="mr-8">Methods</Label>
-            {classData.methods.map((method, methodIndex) => (
+            {interfaceData.methods.map((method, methodIndex) => (
               <div key={method.id} className="space-y-2 border p-2 rounded">
                 <div className="flex items-center gap-2">
                   <Input
@@ -338,23 +233,6 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select
-                    value={method.visibility}
-                    onValueChange={(value) =>
-                      handleMethodChange(methodIndex, "visibility", value)
-                    }
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {visibilityTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -365,10 +243,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                 </div>
                 <div className="pl-8">
                   {method.properties.map((prop, propIndex) => (
-                    <div
-                      key={propIndex}
-                      className="flex items-center gap-2 mt-2"
-                    >
+                    <div key={propIndex} className="flex items-center gap-2 mt-2">
                       <Input
                         value={prop.name}
                         onChange={(e) =>
@@ -427,12 +302,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                 </div>
               </div>
             ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addMethod}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={addMethod}>
               Add Method
             </Button>
           </div>
@@ -449,4 +319,4 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
   );
 };
 
-export default ClassEditorDialog;
+export default InterfaceEditorDialog;

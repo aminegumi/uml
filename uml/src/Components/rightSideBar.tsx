@@ -18,28 +18,6 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 
-// Menu items.
-const paletteItems = [
-  {
-    category: "Class Elements",
-    items: [
-      { type: "class", icon: Box, label: "Class" },
-      { type: "interface", icon: Boxes, label: "Interface" },
-      { type: "abstract", icon: Component, label: "Abstract Class" },
-      { type: "enum", icon: Square, label: "Enumeration" },
-    ],
-  },
-  {
-    category: "Relationships",
-    items: [
-      { type: "inheritance", icon: GitFork, label: "Inheritance" },
-      { type: "implementation", icon: ArrowRight, label: "Implementation" },
-      { type: "association", icon: ArrowLeftRight, label: "Association" },
-      { type: "aggregation", icon: Diamond, label: "Aggregation" },
-      { type: "composition", icon: Circle, label: "Composition" },
-    ],
-  },
-];
 
 const RightSideBar = () => {
   const handleDragStart = (event: React.DragEvent, elementType: string) => {
