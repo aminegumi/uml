@@ -22,30 +22,30 @@ function App() {
   }, []);
 
   return (
-    // <>
-    //   {loading ? (
-    //     <AnimatedExample />
-    //   ) : (
-    //     <Container fluid className="p-0">
-    //       <Heading />
-    //       <Row className="layout-container g-0">
-    //         <SidebarProvider>
-    //           <div className="sidebar-wrapper">
-    //             <LeftSideBar />
-    //           </div>
-    //           <main className="main-content">
-    //             <Body />
-    //           </main>
-    //           <div className="sidebar-wrapper">
-    //             <RightSideBar />
-    //           </div>
-    //         </SidebarProvider>
-    //       </Row>
-    //     </Container>
-    //   )}
-    // </>
+    <>
+      {loading ? (
+        <AnimatedExample />
+      ) : (
+        <Container fluid className="p-0">
+          <Heading />
+          <Row className="layout-container g-0">
+            <SidebarProvider>
+              <div className="sidebar-wrapper">
+                <LeftSideBar />
+              </div>
+              <main className="main-content">
+                <Body />
+              </main>
+              <div className="sidebar-wrapper">
+                <RightSideBar />
+              </div>
+            </SidebarProvider>
+          </Row>
+        </Container>
+      )}
+    </>
 
-    <UMLClassInput/>
+    // <UMLClassInput/>
   );
 }
 
