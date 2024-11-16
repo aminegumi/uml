@@ -146,7 +146,29 @@ const Body: React.FC = () => {
           { row: 1, margin: 3 },
           new go.Binding("itemArray", "attributes"),
           {
-            itemTemplate: $(go.Panel, "Auto", $(go.TextBlock, { margin: new go.Margin(0, 0, 0, 0) }, new go.Binding("text", "", (data) => `${data.visibility} ${data.name}: ${data.type}`))),
+            itemTemplate: $(go.Panel, "Auto", $(go.TextBlock, { margin: new go.Margin(0, 0, 0, 0) }, new go.Binding("text", "", (data) => {let visibilitySymbol = "";
+
+          // Utilisation du switch pour gérer chaque cas de visibilité
+          switch (data.visibility) {
+            case "public":
+              visibilitySymbol = "-";  // Pour public, afficher "-"
+              break;
+            case "private":
+              visibilitySymbol = "+";  // Pour private, afficher "+"
+              break;
+            case "protected":
+              visibilitySymbol = "#";  // Pour protected, afficher "#"
+              break;
+            case "package":
+              visibilitySymbol = "~";  // Pour package, afficher "~"
+              break;
+            default:
+              visibilitySymbol = data.visibility;  // Afficher le texte tel quel si c'est autre chose
+              break;
+          }
+
+          // Retourne le texte formaté avec la visibilité et l'attribut
+          return `${visibilitySymbol} ${data.name}: ${data.type}`;}))),
           }
         ),
         $(go.Shape, "LineH", {
@@ -170,8 +192,31 @@ const Body: React.FC = () => {
                 new go.Binding(
                   "text",
                   "",
-                  (data) =>
-                    `${data.visibility} ${data.name}(): ${data.returnType}`
+                  (data) => { 
+                    let visibilitySymbol = "";
+
+          // Utilisation du switch pour gérer chaque cas de visibilité
+          switch (data.visibility) {
+            case "public":
+              visibilitySymbol = "-";  // Pour public, afficher "-"
+              break;
+            case "private":
+              visibilitySymbol = "+";  // Pour private, afficher "+"
+              break;
+            case "protected":
+              visibilitySymbol = "#";  // Pour protected, afficher "#"
+              break;
+            case "package":
+              visibilitySymbol = "~";  // Pour package, afficher "~"
+              break;
+            default:
+              visibilitySymbol = data.visibility;  // Afficher le texte tel quel si c'est autre chose
+              break;
+          }
+
+          // Retourne le texte formaté avec la visibilité et l'attribut
+          return `${visibilitySymbol} ${data.name}: ${data.type}`;
+                  }
                 )
               )
             ),
@@ -240,7 +285,31 @@ const Body: React.FC = () => {
                   new go.Binding(
                     "text",
                     "",
-                    (data) => `${data.visibility} ${data.name}: ${data.type}`
+                    (data) => {
+                      let visibilitySymbol = "";
+
+          // Utilisation du switch pour gérer chaque cas de visibilité
+          switch (data.visibility) {
+            case "public":
+              visibilitySymbol = "-";  // Pour public, afficher "-"
+              break;
+            case "private":
+              visibilitySymbol = "+";  // Pour private, afficher "+"
+              break;
+            case "protected":
+              visibilitySymbol = "#";  // Pour protected, afficher "#"
+              break;
+            case "package":
+              visibilitySymbol = "~";  // Pour package, afficher "~"
+              break;
+            default:
+              visibilitySymbol = data.visibility;  // Afficher le texte tel quel si c'est autre chose
+              break;
+          }
+
+          // Retourne le texte formaté avec la visibilité et l'attribut
+          return `${visibilitySymbol} ${data.name}: ${data.type}`;
+                    }
                   )
                 )
               ),
@@ -267,8 +336,31 @@ const Body: React.FC = () => {
                   new go.Binding(
                     "text",
                     "",
-                    (data) =>
-                      `${data.visibility} ${data.name}(): ${data.returnType}`
+                    (data) => { 
+                      let visibilitySymbol = "";
+
+          // Utilisation du switch pour gérer chaque cas de visibilité
+          switch (data.visibility) {
+            case "public":
+              visibilitySymbol = "-";  // Pour public, afficher "-"
+              break;
+            case "private":
+              visibilitySymbol = "+";  // Pour private, afficher "+"
+              break;
+            case "protected":
+              visibilitySymbol = "#";  // Pour protected, afficher "#"
+              break;
+            case "package":
+              visibilitySymbol = "~";  // Pour package, afficher "~"
+              break;
+            default:
+              visibilitySymbol = data.visibility;  // Afficher le texte tel quel si c'est autre chose
+              break;
+          }
+
+          // Retourne le texte formaté avec la visibilité et l'attribut
+          return `${visibilitySymbol} ${data.name}: ${data.type}`;
+                    }
                   )
                 )
               ),
