@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import {
   Dialog,
@@ -32,58 +32,102 @@ interface Method {
   visibility: string;
 }
 
-interface ClassAttributes {
+interface AbstractClassAttributes {
+  label: "<<abstract>>";
   name: string;
   attributes: Attribute[];
   methods: Method[];
 }
 
-interface ClassEditorDialogProps {
+interface AbstractAbstracClassEditorDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (classData: ClassAttributes) => void;
-  initialData?: ClassAttributes;
+  onSubmit: (classData: AbstractClassAttributes) => void;
+  initialData?: {
+    name?: string;
+    attributes?: Array<{
+      id: number;
+      name: string;
+      type: string;
+      visibility: string;
+    }>;
+    methods?: Array<{
+      id: number;
+      name: string;
+      properties: Array<{ name: string; type: string }>;
+      returnType: string;
+      visibility: string;
+    }>;
+  };
 }
 
-const dataTypes = ["string", "float", "int", "double", "bool", "date"];
+const emptyAbstractClassData: AbstractClassAttributes = {
+  label: "<<abstract>>",
+  name: "",
+  attributes: [],
+  methods: [],
+};
+
+const dataTypes = ["string", "float", "int", "double", "bool", "date", "void"];
 const visibilityTypes = ["public", "private", "protected", "package"];
 
-const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
+const AbstracClassEditorDialog: React.FC<AbstractAbstracClassEditorDialogProps> = ({
   isOpen,
   onClose,
   onSubmit,
   initialData,
 }) => {
-  const [classData, setClassData] = useState<ClassAttributes>(
-    initialData || {
-      name: "",
-      attributes: [],
-      methods: [],
-    }
+  const [classData, setClassData] = useState<AbstractClassAttributes>(
+    emptyAbstractClassData
   );
 
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setClassData({
+          label: "<<abstract>>",
+          name: initialData.name || "",
+          attributes: (initialData.attributes || []).map((attr, index) => ({
+            ...attr,
+            id: index,
+          })),
+          methods: (initialData.methods || []).map((method, index) => ({
+            ...method,
+            id: index,
+          })),
+        });
+      } else {
+        setClassData(emptyAbstractClassData);
+      }
+    }
+  }, [isOpen, initialData]);
+
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setClassData({ ...classData, name: e.target.value });
+    setClassData((prev) => ({ ...prev, name: e.target.value }));
   };
 
   const handleAttributeChange = (
     index: number,
-    field: "name" | "type" | "visibility",
+    field: keyof Attribute,
     value: string
   ) => {
-    const attributes = [...classData.attributes];
-    attributes[index][field] = value;
-    setClassData({ ...classData, attributes });
+    setClassData((prev) => {
+      const attributes = [...prev.attributes];
+      attributes[index] = { ...attributes[index], [field]: value };
+      return { ...prev, attributes };
+    });
   };
 
   const handleMethodChange = (
     methodIndex: number,
-    field: "name" | "returnType" | "visibility",
+    field: keyof Method,
     value: string
   ) => {
-    const methods = [...classData.methods];
-    methods[methodIndex][field] = value;
-    setClassData({ ...classData, methods });
+    setClassData((prev) => {
+      const methods = [...prev.methods];
+      methods[methodIndex] = { ...methods[methodIndex], [field]: value };
+      return { ...prev, methods };
+    });
   };
 
   const handleMethodPropertyChange = (
@@ -92,64 +136,88 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     field: "name" | "type",
     value: string
   ) => {
-    const methods = [...classData.methods];
-    methods[methodIndex].properties[propertyIndex][field] = value;
-    setClassData({ ...classData, methods });
+    setClassData((prev) => {
+      const methods = [...prev.methods];
+      methods[methodIndex] = {
+        ...methods[methodIndex],
+        properties: methods[methodIndex].properties.map((prop, idx) =>
+          idx === propertyIndex ? { ...prop, [field]: value } : prop
+        ),
+      };
+      return { ...prev, methods };
+    });
   };
 
   const addAttribute = () => {
-    setClassData({
-      ...classData,
+    setClassData((prev) => ({
+      ...prev,
       attributes: [
-        ...classData.attributes,
+        ...prev.attributes,
         {
-          id: classData.attributes.length,
+          id: prev.attributes.length,
           name: "",
           type: "string",
           visibility: "public",
         },
       ],
-    });
+    }));
   };
 
   const addMethod = () => {
-    setClassData({
-      ...classData,
+    setClassData((prev) => ({
+      ...prev,
       methods: [
-        ...classData.methods,
+        ...prev.methods,
         {
-          id: classData.methods.length,
+          id: prev.methods.length,
           name: "",
           properties: [],
           returnType: "void",
           visibility: "public",
         },
       ],
-    });
+    }));
   };
 
   const addMethodProperty = (methodIndex: number) => {
-    const methods = [...classData.methods];
-    methods[methodIndex].properties.push({ name: "", type: "string" });
-    setClassData({ ...classData, methods });
+    setClassData((prev) => {
+      const methods = [...prev.methods];
+      methods[methodIndex] = {
+        ...methods[methodIndex],
+        properties: [
+          ...methods[methodIndex].properties,
+          { name: "", type: "string" },
+        ],
+      };
+      return { ...prev, methods };
+    });
   };
 
   const removeAttribute = (index: number) => {
-    const attributes = [...classData.attributes];
-    attributes.splice(index, 1);
-    setClassData({ ...classData, attributes });
+    setClassData((prev) => ({
+      ...prev,
+      attributes: prev.attributes.filter((_, i) => i !== index),
+    }));
   };
 
   const removeMethod = (index: number) => {
-    const methods = [...classData.methods];
-    methods.splice(index, 1);
-    setClassData({ ...classData, methods });
+    setClassData((prev) => ({
+      ...prev,
+      methods: prev.methods.filter((_, i) => i !== index),
+    }));
   };
 
   const removeMethodProperty = (methodIndex: number, propertyIndex: number) => {
-    const methods = [...classData.methods];
-    methods[methodIndex].properties.splice(propertyIndex, 1);
-    setClassData({ ...classData, methods });
+    setClassData((prev) => {
+      const methods = [...prev.methods];
+      methods[methodIndex] = {
+        ...methods[methodIndex],
+        properties: methods[methodIndex].properties.filter(
+          (_, idx) => idx !== propertyIndex
+        ),
+      };
+      return { ...prev, methods };
+    });
   };
 
   const handleSubmit = () => {
@@ -161,26 +229,28 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Class Editor</DialogTitle>
+          <DialogTitle>
+            {initialData ? "Edit Abstract Class" : "Create New Abstract Class"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Class Name */}
           <div className="space-y-2">
-            <Label htmlFor="className">Class Name</Label>
+            <Label htmlFor="className">Abstract Class Name</Label>
             <Input
               id="className"
               value={classData.name}
               onChange={handleNameChange}
-              placeholder="Enter class name"
+              placeholder="Enter abstract class name"
             />
           </div>
 
           {/* Attributes */}
-          <div className="space-y-2 ">
+          <div className="space-y-2">
             <Label className="mr-8">Attributes</Label>
             {classData.attributes.map((attr, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={attr.id} className="flex items-center gap-2">
                 <Input
                   value={attr.name}
                   onChange={(e) =>
@@ -246,7 +316,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
           <div className="space-y-2">
             <Label className="mr-8">Methods</Label>
             {classData.methods.map((method, methodIndex) => (
-              <div key={methodIndex} className="space-y-2 border p-2 rounded">
+              <div key={method.id} className="space-y-2 border p-2 rounded">
                 <div className="flex items-center gap-2">
                   <Input
                     value={method.name}
@@ -266,7 +336,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {[...dataTypes, "void"].map((type) => (
+                      {dataTypes.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type}
                         </SelectItem>
@@ -300,7 +370,10 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                 </div>
                 <div className="pl-8">
                   {method.properties.map((prop, propIndex) => (
-                    <div key={propIndex} className="flex items-center gap-2 mt-2">
+                    <div
+                      key={propIndex}
+                      className="flex items-center gap-2 mt-2"
+                    >
                       <Input
                         value={prop.name}
                         onChange={(e) =>
@@ -311,7 +384,7 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                             e.target.value
                           )
                         }
-                        placeholder="Property Name"
+                        placeholder="Parameter Name"
                         className="flex-1"
                       />
                       <Select
@@ -352,9 +425,9 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => addMethodProperty(methodIndex)}
-                    className="ml-8 mt-2"
+                    className="mt-2"
                   >
-                    Add Property
+                    Add Parameter
                   </Button>
                 </div>
               </div>
@@ -381,4 +454,4 @@ const ClassEditorDialog: React.FC<ClassEditorDialogProps> = ({
   );
 };
 
-export default ClassEditorDialog;
+export default AbstracClassEditorDialog;
