@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import {
   Dialog,
@@ -20,25 +20,37 @@ import { Label } from "@/components/ui/label";
 interface Method {
   id: number;
   name: string;
+  properties: { name: string; type: string }[];
   returnType: string;
-  visibility: string;
-  properties: { name: string; type: string }[]; // Adding properties for methods
 }
 
 interface InterfaceAttributes {
+  label: "<<Interface>>";
   name: string;
   methods: Method[];
+  extends?: string; // Optional interface extension
 }
 
 interface InterfaceEditorDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (interfaceData: InterfaceAttributes) => void;
-  initialData?: InterfaceAttributes;
+  initialData?: {
+    label: "<<Interface>>";
+    name: string;
+    methods: Method[];
+    extends?: string;
+  };
 }
 
-const dataTypes = ["string", "float", "int", "double", "bool", "date"];
-const visibilityTypes = ["public", "private", "protected", "package"];
+const emptyInterfaceData: InterfaceAttributes = {
+  label: "<<Interface>>",
+  name: "",
+  methods: [],
+  extends: "",
+};
+
+const dataTypes = ["string", "float", "int", "double", "bool", "date", "void"];
 
 const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
   isOpen,
@@ -46,22 +58,44 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
   onSubmit,
   initialData,
 }) => {
-  const [interfaceData, setInterfaceData] = useState<InterfaceAttributes>(
-    initialData || { name: "", methods: [] }
-  );
+  const [interfaceData, setInterfaceData] = useState<InterfaceAttributes>(emptyInterfaceData);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setInterfaceData({
+          label: "<<Interface>>",
+          name: initialData.name,
+          methods: initialData.methods.map((method, index) => ({
+            ...method,
+            id: index,
+          })),
+          extends: initialData.extends,
+        });
+      } else {
+        setInterfaceData(emptyInterfaceData);
+      }
+    }
+  }, [isOpen, initialData]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInterfaceData({ ...interfaceData, name: e.target.value });
+    setInterfaceData((prev) => ({ ...prev, name: e.target.value }));
+  };
+
+  const handleExtendsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInterfaceData((prev) => ({ ...prev, extends: e.target.value }));
   };
 
   const handleMethodChange = (
     methodIndex: number,
-    field: "name" | "returnType" | "visibility",
+    field: keyof Method,
     value: string
   ) => {
-    const methods = [...interfaceData.methods];
-    methods[methodIndex][field] = value;
-    setInterfaceData({ ...interfaceData, methods });
+    setInterfaceData((prev) => {
+      const methods = [...prev.methods];
+      methods[methodIndex] = { ...methods[methodIndex], [field]: value };
+      return { ...prev, methods };
+    });
   };
 
   const handleMethodPropertyChange = (
@@ -70,43 +104,65 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
     field: "name" | "type",
     value: string
   ) => {
-    const methods = [...interfaceData.methods];
-    methods[methodIndex].properties[propertyIndex][field] = value;
-    setInterfaceData({ ...interfaceData, methods });
-  };
-
-  const addMethod = () => {
-    setInterfaceData({
-      ...interfaceData,
-      methods: [
-        ...interfaceData.methods,
-        {
-          id: interfaceData.methods.length,
-          name: "",
-          returnType: "void",
-          visibility: "public",
-          properties: [], // Initial empty properties for each method
-        },
-      ],
+    setInterfaceData((prev) => {
+      const methods = [...prev.methods];
+      methods[methodIndex] = {
+        ...methods[methodIndex],
+        properties: methods[methodIndex].properties.map((prop, idx) =>
+          idx === propertyIndex ? { ...prop, [field]: value } : prop
+        ),
+      };
+      return { ...prev, methods };
     });
   };
 
+  const addMethod = () => {
+    setInterfaceData((prev) => ({
+      ...prev,
+      methods: [
+        ...prev.methods,
+        {
+          id: prev.methods.length,
+          name: "",
+          properties: [],
+          returnType: "void",
+        },
+      ],
+    }));
+  };
+
   const addMethodProperty = (methodIndex: number) => {
-    const methods = [...interfaceData.methods];
-    methods[methodIndex].properties.push({ name: "", type: "string" });
-    setInterfaceData({ ...interfaceData, methods });
+    setInterfaceData((prev) => {
+      const methods = [...prev.methods];
+      methods[methodIndex] = {
+        ...methods[methodIndex],
+        properties: [
+          ...methods[methodIndex].properties,
+          { name: "", type: "string" },
+        ],
+      };
+      return { ...prev, methods };
+    });
   };
 
   const removeMethod = (index: number) => {
-    const methods = [...interfaceData.methods];
-    methods.splice(index, 1);
-    setInterfaceData({ ...interfaceData, methods });
+    setInterfaceData((prev) => ({
+      ...prev,
+      methods: prev.methods.filter((_, i) => i !== index),
+    }));
   };
 
   const removeMethodProperty = (methodIndex: number, propertyIndex: number) => {
-    const methods = [...interfaceData.methods];
-    methods[methodIndex].properties.splice(propertyIndex, 1);
-    setInterfaceData({ ...interfaceData, methods });
+    setInterfaceData((prev) => {
+      const methods = [...prev.methods];
+      methods[methodIndex] = {
+        ...methods[methodIndex],
+        properties: methods[methodIndex].properties.filter(
+          (_, idx) => idx !== propertyIndex
+        ),
+      };
+      return { ...prev, methods };
+    });
   };
 
   const handleSubmit = () => {
@@ -118,7 +174,9 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Interface Editor</DialogTitle>
+          <DialogTitle>
+            {initialData ? "Edit Interface" : "Create New Interface"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -130,6 +188,17 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
               value={interfaceData.name}
               onChange={handleNameChange}
               placeholder="Enter interface name"
+            />
+          </div>
+
+          {/* Extends */}
+          <div className="space-y-2">
+            <Label htmlFor="extends">Extends (Optional)</Label>
+            <Input
+              id="extends"
+              value={interfaceData.extends}
+              onChange={handleExtendsChange}
+              placeholder="Enter interface to extend"
             />
           </div>
 
@@ -157,24 +226,7 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {[...dataTypes, "void"].map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={method.visibility}
-                    onValueChange={(value) =>
-                      handleMethodChange(methodIndex, "visibility", value)
-                    }
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {visibilityTypes.map((type) => (
+                      {dataTypes.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type}
                         </SelectItem>
@@ -189,8 +241,6 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-
-                {/* Method Properties */}
                 <div className="pl-8">
                   {method.properties.map((prop, propIndex) => (
                     <div key={propIndex} className="flex items-center gap-2 mt-2">
@@ -204,7 +254,7 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
                             e.target.value
                           )
                         }
-                        placeholder="Property Name"
+                        placeholder="Parameter Name"
                         className="flex-1"
                       />
                       <Select
@@ -245,19 +295,14 @@ const InterfaceEditorDialog: React.FC<InterfaceEditorDialogProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => addMethodProperty(methodIndex)}
-                    className="ml-8 mt-2"
+                    className="mt-2"
                   >
-                    Add Property
+                    Add Parameter
                   </Button>
                 </div>
               </div>
             ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addMethod}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={addMethod}>
               Add Method
             </Button>
           </div>
