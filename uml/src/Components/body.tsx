@@ -375,6 +375,7 @@ const Body: React.FC = () => {
               setCurrentNodeData({
                 key: nodeData.key,
                 loc: nodeData.loc,
+                label: "<<enumeration>>",
                 name: nodeData.name,
                 attributes: nodeData.attributes || [],
                 category: "enum",
@@ -538,7 +539,8 @@ const Body: React.FC = () => {
     if (diagram && currentNodeData) {
       const nodeData = {
         ...currentNodeData,
-        name: "<<interface>>\n" + data.name,
+        label: "<<interface>>",
+        name: data.name,
         methods: data.methods,
         extends: data.extends,
         category: "interface",
@@ -548,7 +550,7 @@ const Body: React.FC = () => {
         diagram.model.setDataProperty(
           editingNode.data,
           "name",
-          "interface" + data.name
+          data.name
         );
         diagram.model.setDataProperty(
           editingNode.data,
@@ -574,7 +576,8 @@ const Body: React.FC = () => {
     if (diagram && currentNodeData) {
       const nodeData = {
         ...currentNodeData,
-        name: "<<enumeration>>\n" + data.name,
+        label: "<<enumeration>>",
+        name: data.name,
         attributes: data.attributes,
         category: "enum",
       };
@@ -601,7 +604,8 @@ const Body: React.FC = () => {
     if (diagram && currentNodeData) {
       const nodeData = {
         ...currentNodeData,
-        name: "<<abstract>>\n" +data.name,
+        label: "<<abstract>>",
+        name: data.name,
         attributes: data.attributes,
         methods: data.methods,
         category: "abstract",
