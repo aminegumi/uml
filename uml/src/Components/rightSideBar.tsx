@@ -1,3 +1,4 @@
+// RightSideBar.tsx
 import {
   Box,
   Boxes,
@@ -18,13 +19,12 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 
-
 const RightSideBar = () => {
   const handleDragStart = (event: React.DragEvent, elementType: string) => {
-    event.dataTransfer.setData("elementType", elementType);
+    event.dataTransfer.setData("elementType", elementType); // set the correct elementType
   };
 
-  // Menu items.
+  // Menu items
   const paletteItems = [
     {
       category: "Class Elements",
@@ -59,7 +59,7 @@ const RightSideBar = () => {
                   <div
                     key={item.type}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, item.type)}
+                    onDragStart={(e) => handleDragStart(e, item.type)} // Ensure the correct element type is passed
                     className="flex items-center gap-2 rounded-lg cursor-move hover:bg-gray-100 transition-colors"
                   >
                     <div className="p-2 bg-white rounded shadow-sm">

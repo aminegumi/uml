@@ -46,6 +46,7 @@ interface InterfaceAttributes {
   extends?: string;
 }
 
+// Define ClassAttributes type
 interface ClassAttributes {
   name: string;
   attributes: Array<{
@@ -62,6 +63,8 @@ interface ClassAttributes {
     visibility: string;
   }>;
 }
+
+// Define other attributes for abstract, interface, and enumeration as necessary
 
 const Body: React.FC = () => {
   const diagramRef = useRef<go.Diagram | null>(null);
@@ -165,19 +168,29 @@ const Body: React.FC = () => {
           { row: 1, margin: 3 },
           new go.Binding("itemArray", "attributes"),
           {
-            itemTemplate: $(
-              go.Panel,
-              "Auto",
-              $(
-                go.TextBlock,
-                { margin: new go.Margin(0, 0, 0, 0) },
-                new go.Binding(
-                  "text",
-                  "",
-                  (data) => `${data.visibility} ${data.name}: ${data.type}`
-                )
-              )
-            ),
+            itemTemplate: $(go.Panel, "Auto", $(go.TextBlock, { margin: new go.Margin(0, 0, 0, 0) }, new go.Binding("text", "", (data) => {let visibilitySymbol = "";
+
+          // Utilisation du switch pour gérer chaque cas de visibilité
+          switch (data.visibility) {
+            case "public":
+              visibilitySymbol = "-";  // Pour public, afficher "-"
+              break;
+            case "private":
+              visibilitySymbol = "+";  // Pour private, afficher "+"
+              break;
+            case "protected":
+              visibilitySymbol = "#";  // Pour protected, afficher "#"
+              break;
+            case "package":
+              visibilitySymbol = "~";  // Pour package, afficher "~"
+              break;
+            default:
+              visibilitySymbol = data.visibility;  // Afficher le texte tel quel si c'est autre chose
+              break;
+          }
+
+          // Retourne le texte formaté avec la visibilité et l'attribut
+          return `${visibilitySymbol} ${data.name}: ${data.type}`;}))),
           }
         ),
         $(go.Shape, "LineH", {
@@ -201,8 +214,31 @@ const Body: React.FC = () => {
                 new go.Binding(
                   "text",
                   "",
-                  (data) =>
-                    `${data.visibility} ${data.name}(): ${data.returnType}`
+                  (data) => { 
+                    let visibilitySymbol = "";
+
+          // Utilisation du switch pour gérer chaque cas de visibilité
+          switch (data.visibility) {
+            case "public":
+              visibilitySymbol = "-";  // Pour public, afficher "-"
+              break;
+            case "private":
+              visibilitySymbol = "+";  // Pour private, afficher "+"
+              break;
+            case "protected":
+              visibilitySymbol = "#";  // Pour protected, afficher "#"
+              break;
+            case "package":
+              visibilitySymbol = "~";  // Pour package, afficher "~"
+              break;
+            default:
+              visibilitySymbol = data.visibility;  // Afficher le texte tel quel si c'est autre chose
+              break;
+          }
+
+          // Retourne le texte formaté avec la visibilité et l'attribut
+          return `${visibilitySymbol} ${data.name}: ${data.type}`;
+                  }
                 )
               )
             ),
@@ -248,9 +284,12 @@ const Body: React.FC = () => {
         ),
         $(
           go.Panel,
-          "Table",
+          "Vertical",
           { defaultAlignment: go.Spot.Left, margin: 4 },
           $(go.RowColumnDefinition, { row: 0, background: "#F0F0F0" }),
+          $(go.TextBlock, { row: 0, margin: 3, font: "bold 12px sans-serif" },
+      new go.Binding("text", "", () => "<<Abstract>>")
+    ),
           $(
             go.TextBlock,
             { row: 0, margin: 3, font: "bold 12px sans-serif" },
@@ -271,7 +310,31 @@ const Body: React.FC = () => {
                   new go.Binding(
                     "text",
                     "",
-                    (data) => `${data.visibility} ${data.name}: ${data.type}`
+                    (data) => {
+                      let visibilitySymbol = "";
+
+          // Utilisation du switch pour gérer chaque cas de visibilité
+          switch (data.visibility) {
+            case "public":
+              visibilitySymbol = "-";  // Pour public, afficher "-"
+              break;
+            case "private":
+              visibilitySymbol = "+";  // Pour private, afficher "+"
+              break;
+            case "protected":
+              visibilitySymbol = "#";  // Pour protected, afficher "#"
+              break;
+            case "package":
+              visibilitySymbol = "~";  // Pour package, afficher "~"
+              break;
+            default:
+              visibilitySymbol = data.visibility;  // Afficher le texte tel quel si c'est autre chose
+              break;
+          }
+
+          // Retourne le texte formaté avec la visibilité et l'attribut
+          return `${visibilitySymbol} ${data.name}: ${data.type}`;
+                    }
                   )
                 )
               ),
@@ -298,8 +361,31 @@ const Body: React.FC = () => {
                   new go.Binding(
                     "text",
                     "",
-                    (data) =>
-                      `${data.visibility} ${data.name}(): ${data.returnType}`
+                    (data) => { 
+                      let visibilitySymbol = "";
+
+          // Utilisation du switch pour gérer chaque cas de visibilité
+          switch (data.visibility) {
+            case "public":
+              visibilitySymbol = "-";  // Pour public, afficher "-"
+              break;
+            case "private":
+              visibilitySymbol = "+";  // Pour private, afficher "+"
+              break;
+            case "protected":
+              visibilitySymbol = "#";  // Pour protected, afficher "#"
+              break;
+            case "package":
+              visibilitySymbol = "~";  // Pour package, afficher "~"
+              break;
+            default:
+              visibilitySymbol = data.visibility;  // Afficher le texte tel quel si c'est autre chose
+              break;
+          }
+
+          // Retourne le texte formaté avec la visibilité et l'attribut
+          return `${visibilitySymbol} ${data.name}: ${data.type}`;
+                    }
                   )
                 )
               ),
@@ -346,14 +432,16 @@ const Body: React.FC = () => {
         ),
         $(
           go.Panel,
-          "Table",
+          "Vertical",
           { defaultAlignment: go.Spot.Left, margin: 4 },
           $(go.RowColumnDefinition, { row: 0, background: "#F0F0F0" }),
-          $(
-            go.TextBlock,
-            { row: 0, margin: 3, font: "bold 12px sans-serif" },
-            new go.Binding("text", "name")
-          ),
+          $(go.TextBlock, { row: 0, margin: 3, font: "bold 12px sans-serif" },
+      new go.Binding("text", "", () => "<<Interface>>") // Affichage du tag pour l'interface
+    ),
+    // Affichage du nom de l'interface
+    $(go.TextBlock, { row: 1, margin: 3, font: "bold 12px sans-serif" },
+      new go.Binding("text", "name")
+    ),
           $(
             go.Panel,
             "Vertical",
@@ -415,9 +503,12 @@ const Body: React.FC = () => {
         ),
         $(
           go.Panel,
-          "Table",
+          "Vertical",
           { defaultAlignment: go.Spot.Left, margin: 4 },
           $(go.RowColumnDefinition, { row: 0, background: "#F0F0F0" }),
+          $(go.TextBlock, { row: 0, margin: 3, font: "bold 12px sans-serif" },
+      new go.Binding("text", "", () => "<<Enumeration>>")
+    ),
           $(
             go.TextBlock,
             { row: 0, margin: 3, font: "bold 12px sans-serif" },
@@ -608,7 +699,7 @@ const Body: React.FC = () => {
     if (diagram && currentNodeData) {
       const nodeData = {
         ...currentNodeData,
-        name: "<<interface>>\n" + data.name,
+        name: data.name,
         methods: data.methods,
         extends: data.extends,
         category: "interface",
@@ -618,7 +709,7 @@ const Body: React.FC = () => {
         diagram.model.setDataProperty(
           editingNode.data,
           "name",
-          "interface" + data.name
+          data.name
         );
         diagram.model.setDataProperty(
           editingNode.data,
@@ -644,7 +735,7 @@ const Body: React.FC = () => {
     if (diagram && currentNodeData) {
       const nodeData = {
         ...currentNodeData,
-        name: "<<enumeration>>\n" + data.name,
+        name: data.name,
         attributes: data.attributes,
         category: "enum",
       };
@@ -671,7 +762,7 @@ const Body: React.FC = () => {
     if (diagram && currentNodeData) {
       const nodeData = {
         ...currentNodeData,
-        name: "<<abstract>>\n" +data.name,
+        name: data.name,
         attributes: data.attributes,
         methods: data.methods,
         category: "abstract",
@@ -706,6 +797,8 @@ const Body: React.FC = () => {
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       />
+      
+      {/* Class Editor Dialog */}
       <ClassEditorDialog
         isOpen={isClassDialogOpen}
         onClose={() => {
