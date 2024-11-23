@@ -81,11 +81,11 @@ const Body: React.FC = () => {
 
     const diagram = new go.Diagram("myDiagramDiv", {
       "undoManager.isEnabled": true,
-      layout: new go.GridLayout({
-        cellSize: new go.Size(100, 100),
-        spacing: new go.Size(20, 20),
-        wrappingWidth: Infinity,
-      }),
+      // layout: new go.GridLayout({
+      //   cellSize: new go.Size(100, 100),
+      //   spacing: new go.Size(20 , 20),
+      //   wrappingWidth: Infinity,
+      // }),
     });
 
     // Node template for classes
