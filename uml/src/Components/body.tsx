@@ -73,6 +73,10 @@ const Body: React.FC = () => {
   const [currentNodeData, setCurrentNodeData] = useState<any>(null);
   const [editingNode, setEditingNode] = useState<go.Node | null>(null);
 
+  //added selectedRelationType
+  const [selectedRelationType, setSelectedRelationType] = useState<string | null>(null);
+
+
   useEffect(() => {
     const $ = go.GraphObject.make;
 
@@ -83,7 +87,25 @@ const Body: React.FC = () => {
         spacing: new go.Size(20, 20),
         wrappingWidth: Infinity,
       }),
+
+      // added Customizing the diagram's appearance
+
+      "linkingTool.direction": go.LinkingTool.ForwardsOnly,
+      "linkingTool.portGravity": 20,
+      "relinkingTool.fromHandleArchetype": $(go.Shape, "Diamond", {
+        segmentIndex: 0,
+        cursor: "pointer",
+        desiredSize: new go.Size(8, 8),
+        fill: "tomato",
+        stroke: "darkred",
+      }),
+
+      // end of added Customizing the diagram's appearance
     });
+    
+    
+
+
 
     // Node template for classes
     diagram.nodeTemplate = $(
@@ -188,7 +210,7 @@ const Body: React.FC = () => {
         )
       )
     );
-
+    
     // Abstract Class Template
     diagram.nodeTemplateMap.add(
       "abstract",
@@ -421,6 +443,56 @@ const Body: React.FC = () => {
         )
       )
     );
+    const inheritanceLinkTemplate = $(
+      go.Link,
+      { routing: go.Link.AvoidsNodes },
+      $(go.Shape),
+      $(go.Shape, { toArrow: "Triangle", fill: "white" })
+    );
+
+    const implementationLinkTemplate = $(
+      go.Link,
+      { routing: go.Link.AvoidsNodes },
+      $(go.Shape, { strokeDashArray: [4, 2] }),
+      $(go.Shape, { toArrow: "Triangle", fill: "white" })
+    );
+
+    const associationLinkTemplate = $(
+      go.Link,
+      { routing: go.Link.AvoidsNodes },
+      $(go.Shape),
+      $(go.Shape, { toArrow: "OpenTriangle" })
+    );
+
+    const aggregationLinkTemplate = $(
+      go.Link,
+      { routing: go.Link.AvoidsNodes },
+      $(go.Shape),
+      $(
+        go.Shape,
+        { toArrow: "Diamond", fill: "white", scale: 1.2 }
+      )
+    );
+
+    const compositionLinkTemplate = $(
+      go.Link,
+      { routing: go.Link.AvoidsNodes },
+      $(go.Shape),
+      $(
+        go.Shape,
+        { toArrow: "Diamond", fill: "black", scale: 1.2 }
+      )
+    );
+
+    // Add link templates to the diagram
+    diagram.linkTemplateMap.add("inheritance", inheritanceLinkTemplate);
+    diagram.linkTemplateMap.add("implementation", implementationLinkTemplate);
+    diagram.linkTemplateMap.add("association", associationLinkTemplate);
+    diagram.linkTemplateMap.add("aggregation", aggregationLinkTemplate);
+    diagram.linkTemplateMap.add("composition", compositionLinkTemplate);
+
+
+
 
     diagram.linkTemplate = $(
       go.Link,
@@ -451,7 +523,7 @@ const Body: React.FC = () => {
         new go.Point(event.clientX, event.clientY)
       );
 
-      if (elementType === "class") {
+      if (["class", "interface", "enum", "abstract"].includes(elementType)) {
         setCurrentNodeData({
           key: Date.now(),
           loc: `${canvasPoint.x} ${canvasPoint.y}`,
@@ -462,42 +534,40 @@ const Body: React.FC = () => {
         });
         setEditingNode(null);
         setIsClassDialogOpen(true);
-      } else if (elementType === "interface") {
-        setCurrentNodeData({
-          key: Date.now(),
-          loc: `${canvasPoint.x} ${canvasPoint.y}`,
-          label: "<<Interface>>",
-          name: "",
-          methods: [],
-          extends: "",
-          category: "interface",
-        });
-        setEditingNode(null);
-        setIsInterfaceDialogOpen(true);
-      } else if (elementType === "enum") {
-        setCurrentNodeData({
-          key: Date.now(),
-          loc: `${canvasPoint.x} ${canvasPoint.y}`,
-          label: "<<Enumeration>>",
-          name: "",
-          attributes: [],
-          category: "enumeration",
-        });
-        setEditingNode(null);
-        setIsEnumDialogOpen(true);
-      } else if (elementType === "abstract") {
-        setCurrentNodeData({
-          key: Date.now(),
-          loc: `${canvasPoint.x} ${canvasPoint.y}`,
-          label: "<<abstract>>",
-          name: "",
-          attributes: [],
-          methods: [],
-          category: "abstract",
-        });
-        setEditingNode(null);
-        setIsAbstractClassDialogOpen(true);
+      } else if ([
+        "inheritance",
+        "implementation",
+        "association",
+        "aggregation",
+        "composition"
+      ].includes(elementType)) {
+        // Set the selected relationship type
+        setSelectedRelationType(elementType);
+        
+        // Enable link drawing mode
+        diagram.startTransaction("Start Link Drawing");
+        diagram.toolManager.linkingTool.startObject = null;
+        diagram.toolManager.linkingTool.direction = go.LinkingTool.ForwardsOnly;
+        diagram.currentTool = diagram.toolManager.linkingTool;
+        
+        // Set the appropriate link template
+        diagram.toolManager.linkingTool.temporaryLink.routing = go.Link.AvoidsNodes;
+        diagram.toolManager.linkingTool.temporaryLink.category = elementType;
       }
+    }
+  };
+
+  const handleLinkCreated = (from: go.Node, to: go.Node) => {
+    const diagram = diagramRef.current;
+    if (diagram && selectedRelationType) {
+      const linkData = {
+        from: from.key,
+        to: to.key,
+        category: selectedRelationType,
+      };
+      
+      (diagram.model as go.GraphLinksModel).addLinkData(linkData);
+      setSelectedRelationType(null);
     }
   };
 
@@ -629,7 +699,7 @@ const Body: React.FC = () => {
   };
 
   return (
-    <div className="body">
+     <div className="body">
       <div
         id="myDiagramDiv"
         className="diagram-component"
